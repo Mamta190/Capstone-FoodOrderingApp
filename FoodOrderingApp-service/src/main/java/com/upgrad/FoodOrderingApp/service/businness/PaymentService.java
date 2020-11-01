@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class PaymentBusinessService {
+public class PaymentService {
     @Autowired
     private PaymentDao paymentDao;
 
-    public List<PaymentEntity> getPaymentMethods() {
+    public List<PaymentEntity> getAllPaymentMethods() {
         return paymentDao.getPaymentMethods();
     }
 }

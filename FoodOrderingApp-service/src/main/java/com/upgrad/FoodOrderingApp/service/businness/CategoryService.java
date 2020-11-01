@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Service
-public class CategoryBusinessService {
+public class CategoryService {
 
     @Autowired
     RestaurantDao restaurantDao;

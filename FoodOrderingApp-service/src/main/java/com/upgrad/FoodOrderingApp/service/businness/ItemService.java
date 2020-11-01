@@ -1,18 +1,11 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
-import com.upgrad.FoodOrderingApp.service.dao.ItemDao;
-import com.upgrad.FoodOrderingApp.service.dao.OrderDao;
-import com.upgrad.FoodOrderingApp.service.dao.OrderItemDao;
-import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
-import com.upgrad.FoodOrderingApp.service.entity.OrderItemEntity;
-import com.upgrad.FoodOrderingApp.service.entity.OrdersEntity;
-import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
-import com.upgrad.FoodOrderingApp.service.exception.ItemNotFoundException;
+import com.upgrad.FoodOrderingApp.service.dao.*;
+import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.RelationServiceNotRegisteredException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +23,21 @@ public class ItemService {
     @Autowired
     private OrderItemDao orderItemDao;
 
+    @Autowired
+    RestaurantItemDao restaurantItemDao;
+
+    @Autowired
+    CategoryDao categoryDao;
+
+    @Autowired
+    RestaurantDao restaurantDao;
+
     public List<ItemEntity> getItemsByPopularity(RestaurantEntity restaurantEntity) throws RestaurantNotFoundException {
 
         if (restaurantEntity == null) {
             throw new RestaurantNotFoundException("RNF-001", "No restaurant by this id");
         }
-        List<OrdersEntity> ordersEntities = orderDao.getOrderByRestaurant(restaurantEntity);
+        List<OrderEntity> ordersEntities = orderDao.getOrderByRestaurant(restaurantEntity);
 
         List<ItemEntity> itemEntities = new LinkedList<>();
 
@@ -65,5 +67,24 @@ public class ItemService {
 
         return sortedItemEntites;
     }
+    public List<ItemEntity> getItemByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
 
+        RestaurantEntity restaurantEntity = restaurantDao.getRestaurantByUuid(restaurantUuid);
+
+        CategoryEntity categoryEntity = categoryDao.getCategoryByUuid(categoryUuid);
+
+        List<RestaurantItemEntity> restaurantItemEntities = restaurantItemDao.getItemByRestaurant(restaurantEntity);
+
+        List<CategoryItemEntity> categoryItemEntities = categoryDao.getItemByCategory(categoryEntity);
+
+        List<ItemEntity> itemEntities = new LinkedList<>();
+        restaurantItemEntities.forEach(restaurantItemEntity -> {
+            categoryItemEntities.forEach(categoryItemEntity -> {
+                if (restaurantItemEntity.getItem().equals(categoryItemEntity.getItem())) {
+                    itemEntities.add(restaurantItemEntity.getItem());
+                }
+            });
+        });
+        return itemEntities;
+    }
 }

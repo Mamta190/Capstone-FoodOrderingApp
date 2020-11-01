@@ -1,7 +1,7 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
 import com.upgrad.FoodOrderingApp.api.model.*;
-import com.upgrad.FoodOrderingApp.service.businness.AddressBusinessService;
+import com.upgrad.FoodOrderingApp.service.businness.AddressService;
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
 import com.upgrad.FoodOrderingApp.service.businness.StateBusinessService;
 import com.upgrad.FoodOrderingApp.service.entity.*;
@@ -26,7 +26,7 @@ public class AddressController {
     @Autowired
     CustomerService customerService;
     @Autowired
-    AddressBusinessService addressBusinessService;
+    AddressService addressBusinessService;
 
     @Autowired
     StateBusinessService stateBusinessService;

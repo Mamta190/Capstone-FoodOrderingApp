@@ -26,7 +26,7 @@ public class RestaurantController {
     private RestaurantService restaurantBusinessService;
 
     @Autowired
-    private AddressBusinessService addressBusinessService;
+    private AddressService addressBusinessService;
 
     @Autowired
     private StateBusinessService stateBusinessService;
@@ -35,10 +35,10 @@ public class RestaurantController {
     private RestaurantCategoryService restaurantCategoryService;
 
     @Autowired
-    CategoryBusinessService categoryBusinessService;
+    CategoryService categoryBusinessService;
 
     @Autowired
-    ItemBusinessService itemBusinessService;
+    ItemService itemBusinessService;
 
     @Autowired
     CustomerService customerService;

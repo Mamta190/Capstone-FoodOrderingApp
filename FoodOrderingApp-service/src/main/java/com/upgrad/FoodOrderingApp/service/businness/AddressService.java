@@ -20,7 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
-public class AddressBusinessService {
+public class AddressService {
 
     @Autowired
     AddressDao addressDao; //Handle all data of Address

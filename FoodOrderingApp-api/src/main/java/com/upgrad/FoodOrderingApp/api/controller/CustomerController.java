@@ -26,9 +26,6 @@ public class CustomerController {
     CustomerService customerService;
 
     @Autowired
-    LogoutBusinessService logoutBusinessService;
-
-    @Autowired
     UpdatedCustomerBusinessService updatedCustomerBusinessService;
 
     @Autowired
@@ -77,7 +74,7 @@ public class CustomerController {
      */
     @RequestMapping(method = RequestMethod.POST, path = "/customer/logout", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<LogoutResponse> logOut(@RequestHeader("authorization") final String authorization) throws AuthenticationFailedException, AuthorizationFailedException {
-        CustomerEntity logOutUser = logoutBusinessService.logOut(authorization);
+        CustomerEntity logOutUser = customerService.logOut(authorization);
         LogoutResponse logoutResponse = new LogoutResponse().id(logOutUser.getUuid()).message("LOGGED OUT SUCCESSFULLY");
         return new ResponseEntity<LogoutResponse>(logoutResponse, HttpStatus.OK);
     }

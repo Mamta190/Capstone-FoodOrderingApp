@@ -7,7 +7,7 @@ import com.upgrad.FoodOrderingApp.service.businness.OrderService;
 import com.upgrad.FoodOrderingApp.service.entity.CouponEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
 import com.upgrad.FoodOrderingApp.service.entity.OrderItemEntity;
-import com.upgrad.FoodOrderingApp.service.entity.OrdersEntity;
+import com.upgrad.FoodOrderingApp.service.entity.OrderEntity;
 import com.upgrad.FoodOrderingApp.service.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,12 +73,12 @@ public class OrderController {
             throw new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
         }
 
-        List<OrdersEntity> ordersEntities = orderBusinessService.getOrdersByCustomers(accessToken, customerEntity.getUuid());
+        List<OrderEntity> ordersEntities = orderBusinessService.getOrdersByCustomers(accessToken, customerEntity.getUuid());
 
         List<OrderList> orderLists = new LinkedList<>();
 
         if (ordersEntities != null) {
-            for (OrdersEntity ordersEntity : ordersEntities) {
+            for (OrderEntity ordersEntity : ordersEntities) {
 
                 List<OrderItemEntity> orderItemEntities = orderBusinessService.getOrderItemsByOrder(ordersEntity);
 
@@ -156,7 +156,7 @@ public class OrderController {
         List<ItemQuantity> itemList = saveOrderRequest.getItemQuantities();
         String itemUuid = itemList.get(0).getItemId().toString();
         OrderList orderList = new OrderList();
-        OrdersEntity ordersEntity = orderBusinessService.saveOrderList(accessToken,couponUuid,
+        OrderEntity ordersEntity = orderBusinessService.saveOrderList(accessToken,couponUuid,
                 addressUuid,paymentUuid,restaurantUuid,itemUuid, bill);
         SaveOrderResponse saveOrderResponse = new SaveOrderResponse().id(ordersEntity.getUuid())
                 .status("ORDER SUCCESSFULLY PLACED");
