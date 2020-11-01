@@ -18,7 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
-public class RestaurantBusinessService {
+public class RestaurantService {
     @Autowired
     private RestaurantDao restaurantDao;
 
@@ -40,7 +40,7 @@ public class RestaurantBusinessService {
         return restaurantEntities;
     }
 
-    public RestaurantEntity restaurantByUuid(String uuid) throws RestaurantNotFoundException {
+    public RestaurantEntity restaurantByUUID(String uuid) throws RestaurantNotFoundException {
         if (uuid == null || uuid == "") {
             throw new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty");
         }

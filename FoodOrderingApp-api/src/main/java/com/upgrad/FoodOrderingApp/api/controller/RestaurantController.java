@@ -9,13 +9,12 @@ import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import com.upgrad.FoodOrderingApp.service.businness.RestaurantBusinessService;
+import com.upgrad.FoodOrderingApp.service.businness.RestaurantService;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -24,7 +23,7 @@ import java.util.*;
 @CrossOrigin
 public class RestaurantController {
     @Autowired
-    private RestaurantBusinessService restaurantBusinessService;
+    private RestaurantService restaurantBusinessService;
 
     @Autowired
     private AddressBusinessService addressBusinessService;
@@ -191,7 +190,7 @@ public class RestaurantController {
             @PathVariable("restaurant_id") final String restaurantUuid)
             throws RestaurantNotFoundException {
 
-        RestaurantEntity restaurantEntity = restaurantBusinessService.restaurantByUuid(restaurantUuid);
+        RestaurantEntity restaurantEntity = restaurantBusinessService.restaurantByUUID(restaurantUuid);
 
         List<CategoryEntity> categoryEntities = categoryBusinessService.getCategoriesByRestaurant(restaurantUuid);
 
