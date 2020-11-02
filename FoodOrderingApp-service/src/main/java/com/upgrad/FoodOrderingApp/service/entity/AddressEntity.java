@@ -22,7 +22,7 @@ public class AddressEntity {
 
     @Column(name = "flat_buil_number")
     @Size(max = 255)
-    private String flat_buil_number;
+    private String flatBuilNo;
 
     @Column(name = "locality")
     @Size(max = 255)
@@ -38,10 +38,31 @@ public class AddressEntity {
 
     @ManyToOne
     @JoinColumn(name = "state_id")
-    private StateEntity state_id;
+    private StateEntity state;
 
     @Column(name = "active")
+
     private Integer active;
+
+
+    public AddressEntity() {
+
+    }
+    public AddressEntity(
+            String uuid,
+            String flatBuilNo,
+            String locality,
+            String city,
+            String pincode,
+            StateEntity state) {
+        this.uuid = uuid;
+        this.flatBuilNo = flatBuilNo;
+        this.locality = locality;
+        this.city = city;
+        this.pincode = pincode;
+        this.state = state;
+    }
+
 
     public Integer getId() {
         return id;
@@ -59,12 +80,12 @@ public class AddressEntity {
         this.uuid = uuid;
     }
 
-    public String getFlat_buil_number() {
-        return flat_buil_number;
+    public String getFlatBuilNo() {
+        return flatBuilNo;
     }
 
-    public void setFlat_buil_number(String flat_buil_number) {
-        this.flat_buil_number = flat_buil_number;
+    public void setFlatBuilNo(String flat_buil_number) {
+        this.flatBuilNo = flatBuilNo;
     }
 
     public String getLocality() {
@@ -91,12 +112,12 @@ public class AddressEntity {
         this.pincode = pincode;
     }
 
-    public StateEntity getState_id() {
-        return state_id;
+    public StateEntity getState() {
+        return state;
     }
 
-    public void setState_id(StateEntity state_id) {
-        this.state_id = state_id;
+    public void setState(StateEntity state) {
+        this.state = state;
     }
 
     public Integer getActive() {

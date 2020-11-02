@@ -23,6 +23,15 @@ public class RestaurantDao {
             return null;
         }
     }
+    public List<RestaurantEntity> restaurantsByRating(){
+        try{
+            List<RestaurantEntity> restaurantEntities = entityManager.createNamedQuery("restaurantsByRating",RestaurantEntity.class).getResultList();
+            return restaurantEntities;
+        }catch (NoResultException nre){
+            return null;
+        }
+    }
+
 
     public RestaurantEntity getRestaurantByUuid(String uuid) {
 
@@ -54,5 +63,9 @@ public class RestaurantDao {
         } catch (NoResultException nre) {
             return null;
         }
+    }
+    public RestaurantEntity updateRestaurantRating(RestaurantEntity restaurantEntity) {
+        entityManager.merge(restaurantEntity);
+        return restaurantEntity;
     }
 }

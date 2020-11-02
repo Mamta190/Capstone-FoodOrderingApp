@@ -1,11 +1,16 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
 
+import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.CustomerDao;
+import com.upgrad.FoodOrderingApp.service.dao.RestaurantCategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.RestaurantDao;
+import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
+import com.upgrad.FoodOrderingApp.service.entity.RestaurantCategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +19,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,18 +32,31 @@ public class RestaurantService {
     @Autowired
     CustomerDao customerDao;
 
+    @Autowired
+    CategoryDao categoryDao;
+
+    @Autowired
+    RestaurantCategoryDao restaurantCategoryDao;
+
     @Transactional(propagation = Propagation.REQUIRED)
     public List<RestaurantEntity> getAllRestaurants() {
         return restaurantDao.getAllRestaurants();
     }
 
-    public List<RestaurantEntity> restaurantByName(String restaurantName) throws RestaurantNotFoundException {
+    public List<RestaurantEntity> restaurantsByName(String restaurantName) throws RestaurantNotFoundException {
 
         if (restaurantName == null || restaurantName == "") {
             throw new RestaurantNotFoundException("RNF-003", "Restaurant name field should not be empty");
         }
 
         List<RestaurantEntity> restaurantEntities = restaurantDao.restaurantByName(restaurantName);
+        return restaurantEntities;
+    }
+
+    public List<RestaurantEntity> restaurantsByRating() {
+
+        //Calls restaurantsByRating of restaurantDao to get list of RestaurantEntity
+        List<RestaurantEntity> restaurantEntities = restaurantDao.restaurantsByRating();
         return restaurantEntities;
     }
 
@@ -65,33 +85,52 @@ public class RestaurantService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public RestaurantEntity updateRestaurantDetails(RestaurantEntity restaurantEntity, String authorization) throws RestaurantNotFoundException,InvalidRatingException,AuthorizationFailedException {
-        CustomerAuthEntity userAuthToken = restaurantDao.getUserAuthToken(authorization);
-        RestaurantEntity existingRestaurantEntity =  restaurantDao.getRestaurantByUuid(restaurantEntity.getUuid());
-        if(userAuthToken == null) {
-            throw new AuthorizationFailedException("ATHR-001","Customer is not Logged in.");
-        } else if(userAuthToken.getLogoutAt() != null) {
-            throw new AuthorizationFailedException("ATHR-002","Customer is logged out. Log in again to access this endpoint.");
-        } else if(userAuthToken.getExpiresAt().isBefore(ZonedDateTime.now())) {
-            throw new AuthorizationFailedException("ATHR-003","Your session is expired. Log in again to access this endpoint.");
-        } else if(restaurantEntity.getUuid() == "") {
-            throw new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty");
-        } else if(existingRestaurantEntity == null) {
-            throw new RestaurantNotFoundException("RNF-001","No restaurant by this id");
-        } else if(restaurantEntity.getCustomerRating() == null || !(restaurantEntity.getCustomerRating().compareTo(new BigDecimal(0)) > 0 && restaurantEntity.getCustomerRating().compareTo(new BigDecimal(6)) < 0 ) ) {
+    public RestaurantEntity updateRestaurantRating(RestaurantEntity restaurantEntity, Double customerRating) throws InvalidRatingException {
+        if(!customerDao.isValidCustomerRating(customerRating.toString())){ //Checking for the rating to be valid
             throw new InvalidRatingException("IRE-001","Restaurant should be in the range of 1 to 5");
         }
-        int numOfCustomersRated = existingRestaurantEntity.getNumOfCustomersRated() + 1;
-        BigDecimal avgCustRating = existingRestaurantEntity.getCustomerRating().add(restaurantEntity.getCustomerRating()).divide(new BigDecimal(2));
-        restaurantEntity.setCustomerRating(avgCustRating);
-        restaurantEntity.setNumOfCustomersRated(numOfCustomersRated);
-        restaurantEntity.setAddress(existingRestaurantEntity.getAddress());
-        restaurantEntity.setAvgPriceForTwo(existingRestaurantEntity.getAvgPriceForTwo());
-        restaurantEntity.setId(existingRestaurantEntity.getId());
-        restaurantEntity.setPhotoUrl(existingRestaurantEntity.getPhotoUrl());
-        restaurantEntity.setCategories(existingRestaurantEntity.getCategories());
-        restaurantEntity.setRestaurantName(existingRestaurantEntity.getRestaurantName());
-        return restaurantDao.updateRestaurantDetails(restaurantEntity);
+        //Finding the new Customer rating adn updating it.
+        DecimalFormat format = new DecimalFormat("##.0"); //keeping format to one decimal
+        double restaurantRating = restaurantEntity.getCustomerRating();
+        Integer restaurantNoOfCustomerRated = restaurantEntity.getNumberCustomersRated();
+        restaurantEntity.setNumberCustomersRated(restaurantNoOfCustomerRated+1);
+
+        //calculating the new customer rating as per the given data and formula
+        double newCustomerRating = (restaurantRating*(restaurantNoOfCustomerRated.doubleValue())+customerRating)/restaurantEntity.getNumberCustomersRated();
+
+        restaurantEntity.setCustomerRating(Double.parseDouble(format.format(newCustomerRating)));
+
+        //Updating the restautant in the db using the method updateRestaurantRating of restaurantDao.
+        RestaurantEntity updatedRestaurantEntity = restaurantDao.updateRestaurantRating(restaurantEntity);
+
+        return updatedRestaurantEntity;
+
+    }
+
+    public List<RestaurantEntity> restaurantByCategory(final String categoryId)
+            throws CategoryNotFoundException {
+        if (categoryId == null || categoryId == "") {
+            throw new CategoryNotFoundException("CNF-001", "Category id field should not be empty");
+        }
+
+        CategoryEntity categoryEntity = categoryDao.getCategoryById(categoryId);
+        if (categoryEntity == null) {
+            throw new CategoryNotFoundException("CNF-002", "No category by this id");
+        }
+        List<RestaurantCategoryEntity> restaurantCategoryEntities = restaurantCategoryDao.getRestaurantsByCategoryId(categoryEntity);
+
+        if (restaurantCategoryEntities.isEmpty()) {
+            return null;
+        }
+        List<RestaurantEntity> restaurantEntities = new ArrayList<RestaurantEntity>();
+        for (RestaurantCategoryEntity rc : restaurantCategoryEntities) {
+            restaurantEntities.add(rc.getRestaurant());
+        }
+        return restaurantEntities;
+    }
+
+    public List<RestaurantCategoryEntity> getRestaurantCategories(RestaurantEntity restaurantEntity) {
+        return restaurantCategoryDao.getRestaurantCategories(restaurantEntity);
     }
 
 }

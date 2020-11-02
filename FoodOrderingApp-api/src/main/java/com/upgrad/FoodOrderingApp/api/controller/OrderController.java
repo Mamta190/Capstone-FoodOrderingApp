@@ -4,10 +4,7 @@ import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.businness.CouponService;
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
 import com.upgrad.FoodOrderingApp.service.businness.OrderService;
-import com.upgrad.FoodOrderingApp.service.entity.CouponEntity;
-import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthEntity;
-import com.upgrad.FoodOrderingApp.service.entity.OrderItemEntity;
-import com.upgrad.FoodOrderingApp.service.entity.OrderEntity;
+import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,16 +34,16 @@ public class OrderController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/order/coupon/{coupon_name}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<CouponDetailsResponse> getCouponByCouponName(@RequestHeader("authorization") final String authorization,
-                           @PathVariable("coupon_name") final String couponName)
-                            throws AuthorizationFailedException, CouponNotFoundException {
+                                                                       @PathVariable("coupon_name") final String couponName)
+            throws AuthorizationFailedException, CouponNotFoundException {
         String[] authorizedData = authorization.split(" ");
         String accessToken;
         try {
             accessToken = authorizedData[1];
-        }catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             accessToken = authorizedData[0];
         }
-        CouponEntity couponEntity =  couponBusinessService.getCouponByName(accessToken, couponName);
+        CouponEntity couponEntity = couponBusinessService.getCouponByName(accessToken, couponName);
 
         CouponDetailsResponse couponDetailsResponse = new CouponDetailsResponse()
                 .id(UUID.fromString(couponEntity.getUuid())).couponName(couponEntity.getCouponName())
@@ -54,24 +51,13 @@ public class OrderController {
 
         return new ResponseEntity<CouponDetailsResponse>(couponDetailsResponse, HttpStatus.OK);
     }
+
     @RequestMapping(method = RequestMethod.GET, path = "/order", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<CustomerOrderResponse> getPastOrdersOfUser(@RequestHeader("authorization") final String authorization) throws AuthenticationFailedException, AuthorizationFailedException {
 
         String accessToken = authorization.split("Bearer ")[1];
 
-        CustomerAuthEntity customerEntity = customerService.getCustomer(accessToken);
-
-        if (accessToken.equals(null)) {
-            throw new AuthenticationFailedException("ATHR-001", "Customer is not Logged in.");
-        }
-        if (customerEntity.getLogoutAt() != null && accessToken != null) {
-            throw new AuthorizationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint.");
-        }
-        final ZonedDateTime customerSessionExpireTime = ZonedDateTime.now();
-        ZonedDateTime currentTime = ZonedDateTime.now(ZoneId.systemDefault());
-        if (customerSessionExpireTime.compareTo(customerEntity.getExpiresAt()) < 0) {
-            throw new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
-        }
+        CustomerEntity customerEntity = customerService.getCustomer(accessToken);
 
         List<OrderEntity> ordersEntities = orderBusinessService.getOrdersByCustomers(accessToken, customerEntity.getUuid());
 
@@ -96,11 +82,11 @@ public class OrderController {
                     itemQuantityResponseList.add(itemQuantityResponse);
                 });
                 OrderListAddressState orderListAddressState = new OrderListAddressState()
-                        .id(UUID.fromString(ordersEntity.getAddress().getState_id().getUuid()))
-                        .stateName(ordersEntity.getAddress().getState_id().getState_name());
+                        .id(UUID.fromString(ordersEntity.getAddress().getState().getUuid()))
+                        .stateName(ordersEntity.getAddress().getState().getStateName());
 
                 OrderListAddress orderListAddress = new OrderListAddress().id(UUID.fromString(ordersEntity.getAddress().getUuid()))
-                        .flatBuildingName(ordersEntity.getAddress().getFlat_buil_number())
+                        .flatBuildingName(ordersEntity.getAddress().getFlatBuilNo())
                         .locality(ordersEntity.getAddress().getLocality()).city(ordersEntity.getAddress().getCity())
                         .pincode(ordersEntity.getAddress().getPincode()).state(orderListAddressState);
                 OrderListCoupon orderListCoupon = new OrderListCoupon().couponName(ordersEntity.getCoupon().getCouponName())
@@ -137,13 +123,12 @@ public class OrderController {
     public ResponseEntity<SaveOrderResponse> saveOrder(@RequestHeader("authorization") final String authorization,
                                                        @RequestBody(required = false) final SaveOrderRequest saveOrderRequest)
             throws AuthorizationFailedException, CouponNotFoundException, AddressNotFoundException,
-            PaymentMethodNotFoundException, RestaurantNotFoundException, ItemNotFoundException
-    {
+            PaymentMethodNotFoundException, RestaurantNotFoundException, ItemNotFoundException {
         String[] authorizedData = authorization.split(" ");
         String accessToken;
         try {
             accessToken = authorizedData[1];
-        }catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             accessToken = authorizedData[0];
         }
 
@@ -156,8 +141,8 @@ public class OrderController {
         List<ItemQuantity> itemList = saveOrderRequest.getItemQuantities();
         String itemUuid = itemList.get(0).getItemId().toString();
         OrderList orderList = new OrderList();
-        OrderEntity ordersEntity = orderBusinessService.saveOrderList(accessToken,couponUuid,
-                addressUuid,paymentUuid,restaurantUuid,itemUuid, bill);
+        OrderEntity ordersEntity = orderBusinessService.saveOrderList(accessToken, couponUuid,
+                addressUuid, paymentUuid, restaurantUuid, itemUuid, bill);
         SaveOrderResponse saveOrderResponse = new SaveOrderResponse().id(ordersEntity.getUuid())
                 .status("ORDER SUCCESSFULLY PLACED");
         return new ResponseEntity<SaveOrderResponse>(saveOrderResponse, HttpStatus.CREATED);

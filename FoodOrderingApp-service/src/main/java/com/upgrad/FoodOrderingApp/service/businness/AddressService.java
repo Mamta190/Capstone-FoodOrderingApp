@@ -37,7 +37,7 @@ public class AddressService {
     @Transactional(propagation = Propagation.REQUIRED)
     public AddressEntity saveAddress(AddressEntity addressEntity, String stateEntity, final String authorizationToken) throws SaveAddressException, AuthorizationFailedException {
 
-        if (addressEntity.getCity() == null || addressEntity.getFlat_buil_number() == null || addressEntity.getPincode() == null || addressEntity.getLocality() == null) {
+        if (addressEntity.getCity() == null || addressEntity.getFlatBuilNo() == null || addressEntity.getPincode() == null || addressEntity.getLocality() == null) {
             throw new SaveAddressException("SAR-001", "No field can be empty");
         }
         if (!addressDao.IsPinCodeValid(addressEntity.getPincode())) {

@@ -44,7 +44,7 @@ public class AddressController {
         //Creating addressEntity from SaveAddressRequest data.
         AddressEntity addressEntity = new AddressEntity();
 
-        addressEntity.setFlat_buil_number(saveAddressRequest.getFlatBuildingName());
+        addressEntity.setFlatBuilNo(saveAddressRequest.getFlatBuildingName());
         addressEntity.setCity(saveAddressRequest.getCity());
         addressEntity.setLocality(saveAddressRequest.getLocality());
         addressEntity.setPincode(saveAddressRequest.getPincode());
@@ -52,11 +52,11 @@ public class AddressController {
         addressEntity.setActive(1);
 
         final AddressEntity createdAddress = addressBusinessService.saveAddress(addressEntity, bearerToken[1], saveAddressRequest.getStateUuid());
-        final CustomerAuthEntity customerAuthTokenEntity = customerService.getCustomer(bearerToken[1]);
+        final CustomerEntity customerEntity = customerService.getCustomer(bearerToken[1]);
 
         final CustomerAddressEntity customerAddressEntity = new CustomerAddressEntity();
         customerAddressEntity.setAddress(createdAddress);
-        customerAddressEntity.setCustomer(customerAuthTokenEntity.getCustomer());
+        customerAddressEntity.setCustomer(customerEntity);
         addressBusinessService.saveCustomerAddress(customerAddressEntity);
 
         //Creating SaveAddressResponse response
@@ -77,9 +77,9 @@ public class AddressController {
 
         for (CustomerAddressEntity cae : customerAddressEntityList) {
             AddressEntity addressEntity = cae.getAddress();
-            AddressListState addressListState = new AddressListState().id(UUID.fromString(addressEntity.getState_id().getUuid())).stateName(addressEntity.getState_id().getState_name());
+            AddressListState addressListState = new AddressListState().id(UUID.fromString(addressEntity.getState().getUuid())).stateName(addressEntity.getState().getStateName());
             AddressList addressList = new AddressList().id(UUID.fromString(addressEntity.getUuid()))
-                    .flatBuildingName(addressEntity.getFlat_buil_number()).locality(addressEntity.getLocality())
+                    .flatBuildingName(addressEntity.getFlatBuilNo()).locality(addressEntity.getLocality())
                     .city(addressEntity.getCity()).pincode(addressEntity.getPincode()).state(addressListState);
             AddressListResponse addressListResponse = new AddressListResponse().addAddressesItem(addressList);
             addressListResponses.add(addressListResponse);
@@ -111,7 +111,7 @@ public class AddressController {
         List<StatesListResponse> states = new ArrayList<>();
         for (StateEntity state : stateEntities) {
             UUID stateUuid = UUID.fromString(state.getUuid());
-            StatesList statesList = new StatesList().id(stateUuid).stateName(state.getState_name());
+            StatesList statesList = new StatesList().id(stateUuid).stateName(state.getStateName());
             StatesListResponse statesListResponse = new StatesListResponse().addStatesItem(statesList);
             states.add(statesListResponse);
         }

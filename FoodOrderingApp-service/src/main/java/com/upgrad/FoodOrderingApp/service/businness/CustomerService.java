@@ -92,17 +92,20 @@ public class CustomerService {
         }
     }
     @Transactional(propagation = Propagation.REQUIRED)
-    public CustomerAuthEntity getCustomer(final String authorizationToken){
-
+    public CustomerEntity getCustomer(final String authorizationToken) throws AuthorizationFailedException{
         CustomerAuthEntity customerAuth = customerDao.checkAuthToken(authorizationToken);
-        if(customerAuth == null){
-            return null;
+        final ZonedDateTime current = ZonedDateTime.now();
+        if (customerAuth == null){
+            throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
         }
-        else {
-            return customerAuth;
+        if (customerAuth.getLogoutAt() != null){
+            throw new AuthorizationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint.");
         }
+        if (customerAuth.getExpiresAt().isBefore(current)){
+            throw new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
+        }
+        return customerAuth.getCustomer();
     }
-
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerAuthEntity authenticate(final String contactNumber, final String password) throws AuthenticationFailedException {
 
@@ -148,5 +151,6 @@ public class CustomerService {
             throw new AuthorizationFailedException("ATHR-001", "Customer is not Logged in.");
         }
     }
+
 }
 

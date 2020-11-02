@@ -67,7 +67,7 @@ public class ItemService {
 
         return sortedItemEntites;
     }
-    public List<ItemEntity> getItemByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
+    public List<ItemEntity> getItemsByCategoryAndRestaurant(String restaurantUuid, String categoryUuid) {
 
         RestaurantEntity restaurantEntity = restaurantDao.getRestaurantByUuid(restaurantUuid);
 

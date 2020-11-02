@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Repository
 public class CustomerDao {
@@ -28,6 +30,15 @@ public class CustomerDao {
             return null;
         }
     }
+    public boolean isValidCustomerRating(String cutomerRating){
+        if(cutomerRating.equals("5.0")){
+            return true;
+        }
+        Pattern p = Pattern.compile("[1-4].[0-9]");
+        Matcher m = p.matcher(cutomerRating);
+        return (m.find() && m.group().equals(cutomerRating));
+    }
+
 
     public CustomerEntity checkUUID(final String uuid) {
         try {

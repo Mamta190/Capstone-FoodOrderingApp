@@ -8,6 +8,7 @@ import com.upgrad.FoodOrderingApp.service.businness.CategoryService;
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
 import com.upgrad.FoodOrderingApp.service.businness.ItemService;
 import com.upgrad.FoodOrderingApp.service.businness.RestaurantService;
+import com.upgrad.FoodOrderingApp.service.entity.*;
 import com.upgrad.FoodOrderingApp.service.exception.AuthorizationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static com.upgrad.FoodOrderingApp.service.common.ItemType.NON_VEG;
+import static junit.framework.TestCase.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -116,7 +118,7 @@ public class RestaurantControllerTest {
 
     // ------------------------------------------ GET /restaurant/name/{restaurant_name} ------------------------------------------
 
-    //This test case passes when you are able to fetch restaurants by the name you provided.
+ //This test case passes when you are able to fetch restaurants by the name you provided.
     @Test
     public void shouldGetRestaurantDetailsByGivenName() throws Exception {
         final RestaurantEntity restaurantEntity = getRestaurantEntity();
@@ -465,4 +467,7 @@ public class RestaurantControllerTest {
         restaurantEntity.setRestaurantName("Famous Restaurant");
         return restaurantEntity;
     }
-}*/
+}
+
+
+*/

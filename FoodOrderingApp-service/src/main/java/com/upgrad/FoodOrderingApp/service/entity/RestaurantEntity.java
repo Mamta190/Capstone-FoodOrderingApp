@@ -7,7 +7,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +14,7 @@ import java.util.List;
 @Table(name = "restaurant")
 @NamedQueries(
         {
+                @NamedQuery(name = "restaurantsByRating", query = "select r from RestaurantEntity r order by r.customerRating desc"),
                 @NamedQuery(name = "getAllRestaurants", query = "select r from RestaurantEntity r order by r.customerRating desc"),
                 @NamedQuery(name = "getRestaurantByUuid", query = "select r from RestaurantEntity r where r.uuid = :uuid"),
                 @NamedQuery(name = "restaurantByName", query = "select r from RestaurantEntity r where lower(r.restaurantName) like :restaurant_name_lower")
@@ -42,16 +42,15 @@ public class RestaurantEntity implements Serializable {
     private String photoUrl;
 
     @Column(name = "customer_rating")
-    @NotNull
-    private BigDecimal customerRating;
+    private double customerRating;
 
     @Column(name = "average_price_for_two")
     @NotNull
-    private Integer avgPriceForTwo;
+    private Integer avgPrice;
 
     @Column(name = "number_of_customers_rated")
     @NotNull
-    private Integer numOfCustomersRated;
+    private Integer numberCustomersRated;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -107,28 +106,28 @@ public class RestaurantEntity implements Serializable {
         this.photoUrl = photoUrl;
     }
 
-    public BigDecimal getCustomerRating() {
+    public double getCustomerRating() {
         return customerRating;
     }
 
-    public void setCustomerRating(BigDecimal customerRating) {
+    public void setCustomerRating(double customerRating) {
         this.customerRating = customerRating;
     }
 
-    public Integer getNumOfCustomersRated() {
-        return numOfCustomersRated;
+    public Integer getNumberCustomersRated() {
+        return numberCustomersRated;
     }
 
-    public void setNumOfCustomersRated(Integer numOfCustomersRated) {
-        this.numOfCustomersRated = numOfCustomersRated;
+    public void setNumberCustomersRated(Integer numOfCustomersRated) {
+        this.numberCustomersRated = numOfCustomersRated;
     }
 
-    public Integer getAvgPriceForTwo() {
-        return avgPriceForTwo;
+    public Integer getAvgPrice() {
+        return avgPrice;
     }
 
-    public void setAvgPriceForTwo(Integer avgPriceForTwo) {
-        this.avgPriceForTwo = avgPriceForTwo;
+    public void setAvgPrice(Integer avgPrice) {
+        this.avgPrice = avgPrice;
     }
 
     public AddressEntity getAddress() {
@@ -138,6 +137,7 @@ public class RestaurantEntity implements Serializable {
     public void setAddress(AddressEntity address) {
         this.address = address;
     }
+
 
     /*public Set<CategoryEntity> getCategoryEntities() {
         return categoryEntities;
